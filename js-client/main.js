@@ -9,7 +9,7 @@ Http.send();
 // // expected output: 42
 
 // console.log(obj.result);
-
+var obj
 console.log("a")
 Http.onreadystatechange = (e) => {
   obj = JSON.parse(Http.responseText);
@@ -17,7 +17,11 @@ Http.onreadystatechange = (e) => {
 
 
 
+
 ymaps.ready(function () {
+    console.log(obj.FarmCharacteristics[0])
+
+
     var myMap = new ymaps.Map('map', {
             center: [59.452, 33.851],
             zoom: 9
@@ -25,7 +29,7 @@ ymaps.ready(function () {
             searchControlProvider: 'yandex#search'
         });
 
-
+        
         function checkState () {
             // создаем переменные
             var shownObjects,
@@ -76,10 +80,16 @@ ymaps.ready(function () {
 /////// CREATING ARRAY OF FARMS ////////
         farms = new Array()
         obj.Farms.forEach(function(entry) {
+            obj.FarmCharacteristics.forEach(function(FC) {
+                if (FC.FarmID == entry.ID) {
+                    console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+                    myPlacemark = newPlaceMark(entry, FC)
+                    farms.push(myPlacemark)
+                } 
+            })
+            
 
-            myPlacemark = newPlaceMark(entry)
-
-            farms.push(myPlacemark)
+            
             // console.log(entry.ID);
         });
 
@@ -141,9 +151,15 @@ ymaps.ready(function () {
                     
                     // myMap.addOverlay(farmMarks);
                 } else if(type == 'balloonopen') {
+                    var FChar
                     obj.Farms.forEach(function(farm) {
+                        obj.FarmCharacteristics.forEach(function(FC) {
+                            if(FC.FarmID == farm.ID) {
+                                FChar = FC
+                            }
+                        })
                         if (farm.RegionID == entry.ID) {
-                            farmMark = newPlaceMark(farm);
+                            farmMark = newPlaceMark(farm, FChar);
                             farmMarks.add(farmMark);
                             // window.myObjects = ymaps.geoQuery(farmMark).addToMap(myMap);
                         }
@@ -200,28 +216,33 @@ ymaps.ready(function () {
         // myMap.geoObjects.add(Boxitogorsk);
 });
 
-function newPlaceMark(entry) {
-    return new ymaps.Placemark([entry.Latitude, entry.Longtitude], {
+function newPlaceMark(farm, characteristics) {
+    console.log("######################################")
+    console.log(characteristics)
+    console.log("######################################")
+    return new ymaps.Placemark([farm.Latitude, farm.Longtitude], {
         hintContent: `<h3> Характеристика предприятия </h3>
-                            <p>Название: ${entry.Title}</p>
-                            <p>Масса полученного органического удобрения, т/год: ${entry.Specialization}</p>
-                            <p>Тип органического удобрения: ${entry.HeadsOfAnimals}</p>
-                            <p>Масса общего азота в полученном органическом удобрении, т/год: ${entry.HeadsOfCows}</p>
-                            <p>Масса общего фосфора в полученном органическом удобрении, т/год т/год: ${entry.SAL}</p>
-                            <p>Масса общего азота, которую готовы принять земельные угодья самого предприятия, т/год: ${entry.Title}</p>
-                            <p>Масса общего фосфора, которую готовы принять земельные угодья самого предприятия, т/год: ${entry.Title}</p>
-                            <p>Потенциал внесения органического удобрения, т/год: ${entry.Title}</p>
-                            <p>Необходимая дополнительная площадь земельных угодий для внесения ОУ, га: ${entry.Title}</p>
-                            <p>Свободная площадь земельных угодий, на которую можно внести органическое удобрение с других предприятий, га: ${entry.Title}</p>
-                            <p>Необходимая вместимость навозохранилищ для переработки навоза/помета в органическое удобрение, т: ${entry.Title}</p>
-                            <p>Задействованные технические средства при обращении с навозом/пометом и органическим удобрением: ${entry.Title}</p>`,
+                            <p>Название: ${farm.Title}</p>
+                            <p>Масса полученного органического удобрения, т/год: ${characteristics.ManureMass}</p>
+                            <p>Тип органического удобрения: ${farm.OF_type}</p>
+                            <p>Масса общего азота в полученном органическом удобрении, т/год: ${characteristics.NitrogenMassInFertilizer}</p>
+                            <p>Масса общего фосфора в полученном органическом удобрении, т/год т/год: ${characteristics.PhosphorMassInFertilizer}</p>
+                            <p>Масса общего азота, которую готовы принять земельные угодья самого предприятия, т/год: ${characteristics.NitrogenMassForSoil}</p>
+                            <p>Масса общего фосфора, которую готовы принять земельные угодья самого предприятия, т/год: ${characteristics.PhosphorMassForSoil}</p>
+                            <p>Потенциал внесения органического удобрения по азоту, т/год: ${characteristics.FertilizerPotentialByNitrogen}</p>
+                            <p>Потенциал внесения органического удобрения по фосфору, т/год: ${characteristics.FertilizerPotentialByPhosphor}</p>
+                            <p>Необходимая дополнительная площадь земельных угодий для внесения ОУ (азот), га: ${characteristics.SquareDemandForNitrogen}</p>
+                            <p>Необходимая дополнительная площадь земельных угодий для внесения ОУ (фосфор), га: ${characteristics.SquareDemandForPhosphor}</p>
+                            <p>Свободная площадь земельных угодий, на которую можно внести органическое удобрение (азот) с других предприятий, га: ${characteristics.SquareFreeForNitrogen}</p>
+                            <p>Свободная площадь земельных угодий, на которую можно внести органическое удобрение (фосфор) с других предприятий, га: ${characteristics.SquareFreeForPhosphor}</p>
+                            <p>Необходимая вместимость навозохранилищ для переработки навоза/помета в органическое удобрение, т: ${characteristics.DemandForOFStorage}</p>`,
         // balloonContent: `"Привет, ${name}, как дела?"`
         balloonContent: `<h3> Электронный паспорт предприятия</h3>
-                            <p>Название: ${entry.Title}</p>
-                            <p>Специализация: ${entry.Specialization}</p>
-                            <p>Поголовье животных/птиц: ${entry.HeadsOfAnimals}</p>
-                            <p>Поголовье коров: ${entry.HeadsOfCows}</p>
-                            <p>Площадь земельный угодий: ${entry.SAL}</p>`
+                            <p>Название: ${farm.Title}</p>
+                            <p>Специализация: ${farm.Specialization}</p>
+                            <p>Поголовье животных/птиц: ${farm.HeadsOfAnimals}</p>
+                            <p>Поголовье коров: ${farm.HeadsOfCows}</p>
+                            <p>Площадь земельный угодий: ${farm.SAL}</p>`
         // balloonContent: `<h3 class="red">Hi, everyone!</h1>Электронный паспорт предприятия\ndfgdgd\nsdx`
     }, {
         // Опции.

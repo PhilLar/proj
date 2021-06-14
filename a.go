@@ -51,6 +51,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/PhilLar/proj/params"
 	"github.com/PhilLar/proj/pldb"
 	_ "github.com/lib/pq"
 )
@@ -64,8 +65,9 @@ const (
 )
 
 type InitData struct {
-	Farms   []pldb.Farm
-	Regions []pldb.Region
+	Farms               []pldb.Farm
+	FarmCharacteristics []pldb.FarmCharacteristics
+	Regions             []pldb.Region
 }
 
 func main() {
@@ -97,8 +99,30 @@ func foo(w http.ResponseWriter, r *http.Request) {
 		data.Farms = append(data.Farms, farm)
 		// fmt.Println(name, roll)
 	}
+	//////// CALCULATE FARMS CHARACTERISTICS ///////////////////////
 
-	// fmt.Println(data.Farms)
+	for _, farm := range data.Farms {
+		// var FC pldb.FarmCharacteristics
+		FC := pldb.FarmCharacteristics{
+			ManureMass:                    params.ManureMass(farm),
+			NitrogenMassInFertilizer:      params.NitrogenMassInFertilizer(farm),
+			PhosphorMassInFertilizer:      params.PhosphorMassInFertilizer(farm),
+			NitrogenMassForSoil:           params.NitrogenMassForSoil(farm),
+			PhosphorMassForSoil:           params.PhosphorMassForSoil(farm),
+			FertilizerPotentialByNitrogen: params.FertilizerPotentialByNitrogen(farm),
+			FertilizerPotentialByPhosphor: params.FertilizerPotentialByPhosphor(farm),
+			SquareDemandForNitrogen:       params.SquareDemandForNitrogen(farm),
+			SquareDemandForPhosphor:       params.SquareDemandForPhosphor(farm),
+			SquareFreeForNitrogen:         params.SquareFreeForNitrogen(farm),
+			SquareFreeForPhosphor:         params.SquareFreeForPhosphor(farm),
+			DemandForOFStorage:            params.DemandForOFStorage(farm),
+			FarmID:                        farm.ID,
+		}
+		data.FarmCharacteristics = append(data.FarmCharacteristics, FC)
+	}
+
+	////////////////////////////////////////////////////////////////
+
 	//////// SELECT INIT DATA FOR REGIONS ///////////////////////
 	rows, err = db.Query(`SELECT "id", "title", "longtitude", "latitude", "approxsquare" FROM "regions"`)
 	CheckError(err)

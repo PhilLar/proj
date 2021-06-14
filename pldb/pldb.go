@@ -27,3 +27,19 @@ type Region struct {
 	Latitude     float64
 	ApproxSquare float64
 }
+
+type FarmCharacteristics struct {
+	ManureMass                    float64
+	NitrogenMassInFertilizer      float64
+	PhosphorMassInFertilizer      float64
+	NitrogenMassForSoil           float64
+	PhosphorMassForSoil           float64
+	FertilizerPotentialByNitrogen float64
+	FertilizerPotentialByPhosphor float64
+	SquareDemandForNitrogen       float64
+	SquareDemandForPhosphor       float64
+	SquareFreeForNitrogen         float64
+	SquareFreeForPhosphor         float64
+	DemandForOFStorage            float64
+	FarmID                        int
+}
