@@ -63,31 +63,9 @@ const (
 	dbname   = "TestDB"
 )
 
-type Farm struct {
-	ID             int
-	Title          string
-	Specialization string
-	HeadsOfAnimals int
-	HeadsOfCows    int
-	Longtitude     float64
-	Latitude       float64
-	Address        string
-	OF_type        string
-	SAL            float64
-	RegionID       float64
-}
-
-type Region struct {
-	ID           int
-	Title        string
-	Longtitude   float64
-	Latitude     float64
-	ApproxSquare float64
-}
-
 type InitData struct {
-	Farms   []Farm
-	Regions []Region
+	Farms   []pldb.Farm
+	Regions []pldb.Region
 }
 
 func main() {
@@ -111,7 +89,7 @@ func foo(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var farm Farm
+		var farm pldb.Farm
 		pldb.Hello()
 		err = rows.Scan(&farm.ID, &farm.Title, &farm.Specialization, &farm.HeadsOfAnimals, &farm.HeadsOfCows, &farm.Longtitude, &farm.Latitude, &farm.Address, &farm.OF_type, &farm.SAL, &farm.RegionID)
 		CheckError(err)
@@ -127,7 +105,7 @@ func foo(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var region Region
+		var region pldb.Region
 
 		err = rows.Scan(&region.ID, &region.Title, &region.Longtitude, &region.Latitude, &region.ApproxSquare)
 		CheckError(err)
