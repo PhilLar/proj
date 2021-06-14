@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS farms (
    longitude FLOAT NOT NULL,     
    latitude FLOAT NOT NULL,
    address TEXT NOT NULL,
-   SAL BIGINT NOT NULL,
+   OF_type VARCHAR(30) NOt NULL,
+   SAL FLOAT NOT NULL,
    region_id BIGINT REFERENCES regions(id) NOT NULL,
    farm_unions_id BIGINT REFERENCES regions(id)
 );
@@ -47,3 +48,18 @@ CREATE TABLE IF NOT EXISTS farm_unions (
    region_id BIGINT REFERENCES regions(id) UNIQUE NOT NULL
 );
 
+-- TESTING
+
+-- CREATE TABLE IF NOT EXISTS farms (
+--    id       SERIAL   NOT NULL UNIQUE,
+--    title    TEXT NOT NULL
+--    specialization VARCHAR(30) NOT NULL,
+--    heads_of_animals     BIGINT NOT NULL,
+--    heads_of_cows     BIGINT NOT NULL,
+--    longitude FLOAT NOT NULL,     
+--    latitude FLOAT NOT NULL,
+--    address TEXT NOT NULL,
+--    SAL BIGINT NOT NULL,
+--    region_id BIGINT REFERENCES regions(id) NOT NULL,
+--    farm_unions_id BIGINT REFERENCES regions(id)
+-- );
