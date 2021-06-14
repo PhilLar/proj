@@ -65,9 +65,10 @@ const (
 )
 
 type InitData struct {
-	Farms               []pldb.Farm
-	FarmCharacteristics []pldb.FarmCharacteristics
-	Regions             []pldb.Region
+	Farms                 []pldb.Farm
+	FarmCharacteristics   []pldb.FarmCharacteristics
+	Regions               []pldb.Region
+	RegionCharacteristics []pldb.RegionCharacteristics
 }
 
 func main() {
@@ -119,8 +120,8 @@ func foo(w http.ResponseWriter, r *http.Request) {
 			FarmID:                        farm.ID,
 		}
 		data.FarmCharacteristics = append(data.FarmCharacteristics, FC)
-	}
 
+	}
 	////////////////////////////////////////////////////////////////
 
 	//////// SELECT INIT DATA FOR REGIONS ///////////////////////
@@ -139,7 +140,38 @@ func foo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	CheckError(err)
+	////////////////   / CALCULATE FARMS CHARACTERISTICS////////////////////////
+	for _, region := range data.Regions {
+		fmt.Println("aaaaaaaaaaaa1")
+		RC := pldb.RegionCharacteristics{}
 
+		for _, farm := range data.Farms {
+
+			if farm.RegionID == region.ID {
+				fmt.Println("aaaaaaaaaaaa2")
+				for _, FC := range data.FarmCharacteristics {
+
+					if farm.ID == FC.FarmID {
+						fmt.Println("aaaaaaaaaaaa3")
+						RC.ManureMass += FC.ManureMass
+						RC.NitrogenMassInFertilizer += FC.NitrogenMassInFertilizer
+						RC.PhosphorMassInFertilizer += FC.PhosphorMassInFertilizer
+						RC.NitrogenMassForSoil += FC.NitrogenMassForSoil
+						RC.PhosphorMassForSoil += FC.PhosphorMassForSoil
+						RC.SquareDemandForFertilizer += FC.SquareDemandForNitrogen + FC.SquareDemandForPhosphor
+						RC.SquareFreeForFertilizer += FC.SquareFreeForNitrogen + FC.SquareFreeForPhosphor
+						RC.DemandForOFStorage += FC.DemandForOFStorage
+					}
+				}
+			}
+		}
+		fmt.Println("aaaaaaaaaaaa")
+		RC.FertilizerPotentialByNitrogen = RC.NitrogenMassForSoil - RC.NitrogenMassInFertilizer
+		RC.FertilizerPotentialByPhosphor = RC.PhosphorMassForSoil - RC.PhosphorMassInFertilizer
+		RC.RegionID = region.ID
+		data.RegionCharacteristics = append(data.RegionCharacteristics, RC)
+	}
+	////////////////////////////////////////////////////////////////
 	js, err := json.Marshal(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

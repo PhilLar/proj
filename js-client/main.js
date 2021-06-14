@@ -19,7 +19,7 @@ Http.onreadystatechange = (e) => {
 
 
 ymaps.ready(function () {
-    console.log(obj.FarmCharacteristics[0])
+    console.log(obj)
 
 
     var myMap = new ymaps.Map('map', {
@@ -123,8 +123,14 @@ ymaps.ready(function () {
                 }
             });
 
+            var RChar
+            obj.RegionCharacteristics.forEach(function(RC) {
+                if(RC.RegionID == entry.ID) {
+                    RChar = RC
+                }
+            });
 
-            zone = new ymaps.Circle([[59.488250, 34.590600], 50000], {
+            zone = new ymaps.Circle([[entry.Latitude,  entry.Longtitude], 50000], {
                 balloonContent: `<h3> Электронный паспорт района</h3>
                                     <p>Название: ${entry.Title}</p>
                                     <p>Колличество предприятий КРС: ${KRS_farms_amount}</p>
@@ -132,7 +138,18 @@ ymaps.ready(function () {
                                     <p>Поголовье коров: ${KRS_heads}</p>
                                     <p>Поголовье животных/птиц: ${ANIMALS_heads}</p>
                                     <p>Площадь земельный угодий: ${SAL}</p>`,
-                hintContent: entry.Title
+                hintContent: `<h3> Характеристика района </h3>
+                            <p>Название: ${entry.Title}</p>
+                            <p>Масса полученного органического удобрения, т/год: ${RChar.ManureMass}</p>
+                            <p>Масса общего азота в полученном органическом удобрении, т/год: ${RChar.NitrogenMassInFertilizer}</p>
+                            <p>Масса общего фосфора в полученном органическом удобрении, т/год т/год: ${RChar.PhosphorMassInFertilizer}</p>
+                            <p>Масса общего азота, которую готовы принять земельные угодья самого предприятия, т/год: ${RChar.NitrogenMassForSoil}</p>
+                            <p>Масса общего фосфора, которую готовы принять земельные угодья самого предприятия, т/год: ${RChar.PhosphorMassForSoil}</p>
+                            <p>Потенциал внесения органического удобрения по азоту, т/год: ${RChar.FertilizerPotentialByNitrogen}</p>
+                            <p>Потенциал внесения органического удобрения по фосфору, т/год: ${RChar.FertilizerPotentialByPhosphor}</p>
+                            <p>Необходимая дополнительная площадь земельных угодий для внесения ОУ, га: ${RChar.SquareDemandForFertilizer}</p>
+                            <p>Свободная площадь земельных угодий, на которую можно внести органическое удобрение с других предприятий, га: ${RChar.SquareFreeForFertilizer}</p>
+                            <p>Необходимая вместимость навозохранилищ для переработки навоза/помета в органическое удобрение, т: ${RChar.DemandForOFStorage}</p>`,
             }, {
                 draggable: false,
                 opacity: 0.001,
@@ -147,7 +164,7 @@ ymaps.ready(function () {
                 type = e.get('type');
                 if (type == 'mouseenter') {
                     target.options.set("opacity", 0.5);
-
+                    // if ()
                     
                     // myMap.addOverlay(farmMarks);
                 } else if(type == 'balloonopen') {
@@ -160,6 +177,37 @@ ymaps.ready(function () {
                         })
                         if (farm.RegionID == entry.ID) {
                             farmMark = newPlaceMark(farm, FChar);
+                            ///////////////////////////
+                            var pic
+                            var M1 = FChar.NitrogenMassInFertilizer
+                            var M2 = FChar.NitrogenMassForSoil
+                            var MPH1 = FChar.PhosphorMassInFertilizer
+                            var MPH2 = FChar.PhosphorMassForSoil
+                            if (M2 - M1 > 0 || MPH2 - MPH1 > 0) {
+                                pic = 'cons1.jpg'
+                            } else if (M2 - M1 == M2 || MPH2 - MPH2 == M2) {
+                                pic = 'cons2.jpg'
+                            } else if (((M2-M1<0)&&(M2-M1!=-M1)) || ((MPH2-MPH1<0)&&(MPH2-MPH1!=-M1))) {
+                                pic = 'prod1.jpg'
+                            } else if (M2-M1==-M1 || MPH2-MPH1==-M1) {
+                                pic = 'prod2.jpg'
+                            }
+
+                            farmMark.events.add(['click', 'mouseleave'], function (f) {
+                                var farmTarget = f.get('target')
+                                farmType = f.get('type')
+                                if(type == 'click') {
+                                    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
+                                    farmTarget.options.set('iconImageHref', 'img/map-marker.png')
+                                } else {
+                                    console.log("ИИИИИИИИИИИИИИИИИИИИИИИИИ")
+                                    
+                                    // iconImageSize: [30, 42],
+                                    farmTarget.options.set('iconImageSize', [45, 63])
+                                    farmTarget.options.set('iconImageHref', `img/${pic}`)
+                                }
+                            });
+                            /////////////////////////////////
                             farmMarks.add(farmMark);
                             // window.myObjects = ymaps.geoQuery(farmMark).addToMap(myMap);
                         }
@@ -249,7 +297,7 @@ function newPlaceMark(farm, characteristics) {
         // Необходимо указать данный тип макета.
         iconLayout: 'default#image',
         // Своё изображение иконки метки.
-        iconImageHref: 'img/map-marker.png',
+        // iconImageHref: 'img/map-marker.png',
         // Размеры метки.
         iconImageSize: [30, 42],
         // Смещение левого верхнего угла иконки относительно
