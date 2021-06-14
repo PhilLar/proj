@@ -68,7 +68,7 @@ type Farm struct {
 	Title          string
 	Specialization string
 	HeadsOfAnimals int
-	HeadsofCows    int
+	HeadsOfCows    int
 	Longtitude     float64
 	Latitude       float64
 	Address        string
@@ -78,8 +78,11 @@ type Farm struct {
 }
 
 type Region struct {
-	ID    int
-	Title string
+	ID           int
+	Title        string
+	Longtitude   float64
+	Latitude     float64
+	ApproxSquare float64
 }
 
 type InitData struct {
@@ -101,13 +104,8 @@ func foo(w http.ResponseWriter, r *http.Request) {
 
 	defer db.Close()
 
-	// insert
-	// hardcoded
-
-	// farms := []Farm{}
-	// regions := []Region{}
 	var data InitData
-
+	//////// SELECT INIT DATA FOR FARMS ///////////////////////
 	rows, err := db.Query(`SELECT "id", "title", "specialization", "heads_of_animals", "heads_of_cows", "longitude", "latitude", "address", "of_type", "sal", "region_id" FROM "farms"`)
 	CheckError(err)
 	defer rows.Close()
@@ -115,7 +113,7 @@ func foo(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var farm Farm
 		pldb.Hello()
-		err = rows.Scan(&farm.ID, &farm.Title, &farm.Specialization, &farm.HeadsOfAnimals, &farm.HeadsofCows, &farm.Longtitude, &farm.Latitude, &farm.Address, &farm.OF_type, &farm.SAL, &farm.RegionID)
+		err = rows.Scan(&farm.ID, &farm.Title, &farm.Specialization, &farm.HeadsOfAnimals, &farm.HeadsOfCows, &farm.Longtitude, &farm.Latitude, &farm.Address, &farm.OF_type, &farm.SAL, &farm.RegionID)
 		CheckError(err)
 
 		data.Farms = append(data.Farms, farm)
@@ -123,15 +121,15 @@ func foo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fmt.Println(data.Farms)
-
-	rows, err = db.Query(`SELECT "id", "title" FROM "regions"`)
+	//////// SELECT INIT DATA FOR REGIONS ///////////////////////
+	rows, err = db.Query(`SELECT "id", "title", "longtitude", "latitude", "approxsquare" FROM "regions"`)
 	CheckError(err)
 	defer rows.Close()
 
 	for rows.Next() {
 		var region Region
 
-		err = rows.Scan(&region.ID, &region.Title)
+		err = rows.Scan(&region.ID, &region.Title, &region.Longtitude, &region.Latitude, &region.ApproxSquare)
 		CheckError(err)
 
 		data.Regions = append(data.Regions, region)

@@ -102,33 +102,11 @@ ymaps.ready(function () {
 
         // myMap.geoObjects.add(myPlacemark)
 
-
+/////// CREATING ARRAY OF FARMS ////////
         farms = new Array()
         obj.Farms.forEach(function(entry) {
 
-            myPlacemark = new ymaps.Placemark([entry.Latitude, entry.Longtitude], {
-                hintContent: entry.Title,
-                // balloonContent: `"Привет, ${name}, как дела?"`
-                balloonContent: `<h3> Электронный паспорт предприятия</h3>
-                                    <p>Название: ${entry.Title}</p>
-                                    <p>Специализация: ${entry.Specialization}</p>
-                                    <p>Поголовье животных/птицы: ${entry.HeadsOfAnimals}</p>
-                                    <p>Поголовье коров: ${entry.HeadsofCows}</p>
-                                    <p>Площадь земельный угодий: ${entry.SAL}</p>`
-                // balloonContent: `<h3 class="red">Hi, everyone!</h1>Электронный паспорт предприятия\ndfgdgd\nsdx`
-            }, {
-                // Опции.
-                // Необходимо указать данный тип макета.
-                iconLayout: 'default#image',
-                // Своё изображение иконки метки.
-                iconImageHref: 'img/map-marker.png',
-                // Размеры метки.
-                iconImageSize: [30, 42],
-                // Смещение левого верхнего угла иконки относительно
-                // её "ножки" (точки привязки).
-                iconImageOffset: [-5, -38],
-                quantity: "krs"
-            });
+            myPlacemark = newPlaceMark(entry)
 
             farms.push(myPlacemark)
             // console.log(entry.ID);
@@ -136,45 +114,142 @@ ymaps.ready(function () {
 
 
 
-        farms.forEach(function(entry) {
+        // farms.forEach(function(entry) {
+        //     window.myObjects = ymaps.geoQuery(entry).addToMap(myMap);
+        // });
+
+////////////////// ARRAY OF REGIONS ///////////////////////
+
+        regions = new Array()
+        obj.Regions.forEach(function(entry) {
+        
+            KRS_farms_amount = 0
+            KRS_heads = 0
+            ANIMALS_farms_amount = 0
+            ANIMALS_heads = 0
+            SAL = 0
+
+            obj.Farms.forEach(function(f) {
+                if (f.RegionID == entry.ID) {
+                    if (f.Specialization = "КРС") {
+                        KRS_farms_amount++;
+                    } else {
+                        ANIMALS_farms_amount++;
+                    }
+                    KRS_heads += f.HeadsOfCows;
+                    ANIMALS_heads += f.HeadsOfAnimals;
+                    SAL += f.SAL;
+                }
+            });
+
+
+            zone = new ymaps.Circle([[59.488250, 34.590600], 50000], {
+                balloonContent: `<h3> Электронный паспорт района</h3>
+                                    <p>Название: ${entry.Title}</p>
+                                    <p>Колличество предприятий КРС: ${KRS_farms_amount}</p>
+                                    <p>Колличество предприятий животных/птиц: ${ANIMALS_farms_amount}</p>
+                                    <p>Поголовье коров: ${KRS_heads}</p>
+                                    <p>Поголовье животных/птиц: ${ANIMALS_heads}</p>
+                                    <p>Площадь земельный угодий: ${SAL}</p>`,
+                hintContent: entry.Title
+            }, {
+                draggable: false,
+                opacity: 0.001,
+                fill: true,
+                fillColor: "FF3333"
+            });
+
+
+            farmMarks = new ymaps.GeoObjectCollection();
+            zone.events.add(['mouseenter', 'mouseleave'], function (e) {
+                var target = e.get('target')
+                type = e.get('type');
+                if (type == 'mouseenter') {
+                    target.options.set("opacity", 0.5);
+
+                    obj.Farms.forEach(function(farm) {
+                        if (farm.RegionID == entry.ID) {
+                            farmMark = newPlaceMark(farm);
+                            farmMarks.add(farmMark);
+                            // window.myObjects = ymaps.geoQuery(farmMark).addToMap(myMap);
+                        }
+                    });
+                    myMap.geoObjects.add(farmMarks);
+                    // myMap.addOverlay(farmMarks);
+                } else {
+                    console.log("AAAAA")
+                    target.options.set("opacity", 0.001);
+
+                    myMap.geoObjects.remove(farmMarks);
+                }
+            });
+
+            regions.push(zone);
+        });
+
+        regions.forEach(function(entry) {
             window.myObjects = ymaps.geoQuery(entry).addToMap(myMap);
         });
 
 
+        ////////////////////////////////////////////////
 
-
-
-
-        Boxitogorsk = new ymaps.Circle([[59.473576, 33.847675], 5000], {
-            balloonContentBody: 'Балун',
-            hintContent: 'Хинт'
-        }, {
-            draggable: false,
-            opacity: 0.001,
-            fill: true,
-            fillColor: "FF3333"
-        });
+        // Boxitogorsk = new ymaps.Circle([[59.473576, 33.847675], 5000], {
+        //     balloonContentBody: 'Балун',
+        //     hintContent: 'Бокситогорск'
+        // }, {
+        //     draggable: false,
+        //     opacity: 0.001,
+        //     fill: true,
+        //     fillColor: "FF3333"
+        // });
         
-        Boxitogorsk.events.add(['mouseenter', 'mouseleave'], function (e) {
-            console.log("sos")
-            var target = e.get('target')
-            type = e.get('type');
-            if (type == 'mouseenter') {
-                target.options.set("opacity", 0.5);
-            } else {
-                target.options.set("opacity", 0.001);
-            }
-            // console.log("sosi")
-            // target.options.set("opacity", 0.85);
-            // myCircle.options.opacity = 1;
-            // newCircle = myCircle
-            // newCircle.options.opacity = 1;
-            // myCircle.options.fillColor = "33FFF6";
-            // console.log("#########################")
-            // console.log(myCircle)
-            // console.log("#########################")
-            // myMap.geoObjects.add(newCircle);
-        });
+        // Boxitogorsk.events.add(['mouseenter', 'mouseleave'], function (e) {
+        //     console.log("sos")
+        //     var target = e.get('target')
+        //     type = e.get('type');
+        //     if (type == 'mouseenter') {
+        //         target.options.set("opacity", 0.5);
+        //     } else {
+        //         target.options.set("opacity", 0.001);
+        //     }
+        //     // console.log("sosi")
+        //     // target.options.set("opacity", 0.85);
+        //     // myCircle.options.opacity = 1;
+        //     // newCircle = myCircle
+        //     // newCircle.options.opacity = 1;
+        //     // myCircle.options.fillColor = "33FFF6";
+        //     // console.log("#########################")
+        //     // console.log(myCircle)
+        //     // console.log("#########################")
+        //     // myMap.geoObjects.add(newCircle);
+        // });
 
-        myMap.geoObjects.add(Boxitogorsk);
+        // myMap.geoObjects.add(Boxitogorsk);
 });
+
+function newPlaceMark(entry) {
+    return new ymaps.Placemark([entry.Latitude, entry.Longtitude], {
+        hintContent: entry.Title,
+        // balloonContent: `"Привет, ${name}, как дела?"`
+        balloonContent: `<h3> Электронный паспорт предприятия</h3>
+                            <p>Название: ${entry.Title}</p>
+                            <p>Специализация: ${entry.Specialization}</p>
+                            <p>Поголовье животных/птиц: ${entry.HeadsOfAnimals}</p>
+                            <p>Поголовье коров: ${entry.HeadsOfCows}</p>
+                            <p>Площадь земельный угодий: ${entry.SAL}</p>`
+        // balloonContent: `<h3 class="red">Hi, everyone!</h1>Электронный паспорт предприятия\ndfgdgd\nsdx`
+    }, {
+        // Опции.
+        // Необходимо указать данный тип макета.
+        iconLayout: 'default#image',
+        // Своё изображение иконки метки.
+        iconImageHref: 'img/map-marker.png',
+        // Размеры метки.
+        iconImageSize: [30, 42],
+        // Смещение левого верхнего угла иконки относительно
+        // её "ножки" (точки привязки).
+        iconImageOffset: [-5, -38],
+        quantity: "krs"
+    });
+  }

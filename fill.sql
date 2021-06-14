@@ -1,4 +1,4 @@
--- INSERT INTO regions(title) VALUES ('Бокситогорский'), ('Волосовский');
+INSERT INTO regions(title, longtitude, latitude, approxSquare) VALUES ('Бокситогорский', 33.847675, 59.473576, 5000);
 
 INSERT INTO farms(title, specialization, heads_of_animals, heads_of_cows, longitude, latitude, address, OF_type, SAL, region_id) 
             VALUES ('ГАПОУ ЛО "Борский агропромышленный техникум"', 'КРС', 94, 55, 33.850725, 59.452319, '187650 ЛО Бокситогорский район д. Кондратово', 'ТОУ', 0, 1),

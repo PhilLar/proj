@@ -1,19 +1,13 @@
 -- CREATE USER philipp WITH PASSWORD 'qwedf12';
 -- GRANT ALL PRIVILEGES ON DATABASE "TestDB" to philipp;
 
--- CREATE TABLE films (
---     code        char(5),
---     title       varchar(40),
---     did         integer,
---     date_prod   date,
---     kind        varchar(10),
---     len         interval hour to minute,
---     CONSTRAINT production UNIQUE(date_prod)
--- );
 
 CREATE TABLE IF NOT EXISTS regions (
    id SERIAL NOT NULL UNIQUE,
-   title TEXT NOT NULL
+   title TEXT NOT NULL,
+   longtitude FLOAT NOT NULL,   
+   latitude FLOAT NOT NULL,
+   approxSquare FLOAT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS farms (
