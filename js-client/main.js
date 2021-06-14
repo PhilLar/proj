@@ -13,9 +13,6 @@ Http.send();
 console.log("a")
 Http.onreadystatechange = (e) => {
   obj = JSON.parse(Http.responseText);
-  console.log(Http.responseText)
-  console.log("f")
-  console.log(obj[0].Title)
 }
 
 
@@ -26,31 +23,9 @@ ymaps.ready(function () {
             zoom: 9
         }, {
             searchControlProvider: 'yandex#search'
-        }),
-
-        // Создаём макет содержимого.
-        MyIconContentLayout = ymaps.templateLayoutFactory.createClass(
-            '<div style="color: #FFFFFF; font-weight: bold;">$[properties.iconContent]</div>'
-        ),
-
-        myPlacemark = new ymaps.Placemark([59.97, 30.31], {
-            hintContent: 'Собственный значок метки',
-            balloonContent: 'Это красивая метка'
-        }, {
-            // Опции.
-            // Необходимо указать данный тип макета.
-            iconLayout: 'default#image',
-            // Своё изображение иконки метки.
-            iconImageHref: 'img/map-marker.png',
-            // Размеры метки.
-            iconImageSize: [30, 42],
-            // Смещение левого верхнего угла иконки относительно
-            // её "ножки" (точки привязки).
-            iconImageOffset: [-5, -38],
-            quantity: "krs"
         });
 
-        console.log("here0");
+
         function checkState () {
             // создаем переменные
             var shownObjects,
@@ -65,14 +40,10 @@ ymaps.ready(function () {
                 if(quantity!=null){
                     variant+=1;
                 }
-                // if(city!=null){
-                //     variant+=10;
-                // }
-
-                console.log("here1");
+ 
                 switch(variant){
                     case 1:
-                        console.log("here");
+
                         filter_q = myObjects.search('options.quantity="'+quantity+'"').add(filter_q);
                         shownObjects=filter_q.addToMap(myMap);
                         break;
@@ -161,12 +132,15 @@ ymaps.ready(function () {
 
 
             farmMarks = new ymaps.GeoObjectCollection();
-            zone.events.add(['mouseenter', 'mouseleave'], function (e) {
+            zone.events.add(['mouseenter', 'balloonclose', 'balloonopen', 'mouseleave'], function (e) {
                 var target = e.get('target')
                 type = e.get('type');
                 if (type == 'mouseenter') {
                     target.options.set("opacity", 0.5);
 
+                    
+                    // myMap.addOverlay(farmMarks);
+                } else if(type == 'balloonopen') {
                     obj.Farms.forEach(function(farm) {
                         if (farm.RegionID == entry.ID) {
                             farmMark = newPlaceMark(farm);
@@ -175,12 +149,10 @@ ymaps.ready(function () {
                         }
                     });
                     myMap.geoObjects.add(farmMarks);
-                    // myMap.addOverlay(farmMarks);
+                } else if (type == 'balloonclose') {
+                    setTimeout(() => {  myMap.geoObjects.remove(farmMarks); }, 2000);      
                 } else {
-                    console.log("AAAAA")
                     target.options.set("opacity", 0.001);
-
-                    myMap.geoObjects.remove(farmMarks);
                 }
             });
 
